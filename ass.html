@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz By Amna Malik</title>
+    <style>
+        body { font-family: Arial; text-align: center; transition: background 0.5s; }
+        #quiz-container { max-width: 500px; margin: auto; padding: 20px; border: 2px solid black; border-radius: 10px; background: white; box-shadow: 5px 5px 15px gray; }
+        .hidden { display: none; }
+        .correct { color: green; font-weight: bold; }
+        .wrong { color: red; font-weight: bold; }
+        button { padding: 10px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Quiz App</h1>
+    <div id="category-container">
+        <label>Select Category:</label>
+        <select id="category">
+            <option value="history">History</option>
+            <option value="technology">Technology</option>
+            <option value="literature">Literature</option>
+        </select>
+        <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+    
+    <div id="quiz-container" class="hidden">
+        <p id="question"></p>
+        <div id="options"></div>
+        <p id="timer"></p>
+        <button onclick="useHint()" id="hint-btn">Hint</button>
+    </div>
+
+    <script>
+        const questions = {
+            history: [
+                { q: "First President of USA?", options: ["George Washington", "Abraham Lincoln", "John Adams"], answer: "George Washington", hint: "The first leader of the USA." },
+                { q: "Year World War II ended?", options: ["1942", "1945", "1950"], answer: "1945", hint: "Mid-1940s" }
+            ],
+            technology: [
+                { q: "Founder of Microsoft?", options: ["Steve Jobs", "Bill Gates", "Elon Musk"], answer: "Bill Gates", hint: "One of the richest people ever." },
+                { q: "HTML stands for?", options: ["Hyper Text Markup Language", "Hyperlink Text Main Language", "High Tech Markup Language"], answer: "Hyper Text Markup Language", hint: "Used in web development." }
+            ],
+            literature: [
+                { q: "Who wrote 'Hamlet'?", options: ["Shakespeare", "Hemingway", "Tolkien"], answer: "Shakespeare", hint: "Famous English playwright." },
+                { q: "Which book series features Harry Potter?", options: ["Twilight", "The Hobbit", "Harry Potter"], answer: "Harry Potter", hint: "Magic and wizards." }
+            ]
+        };
+        
+        let currentCategory, currentQuestionIndex = 0, timer, score = 0, hintUsed = false;
+
+        function startQuiz() {
+            currentCategory = document.getElementById("category").value;
+            document.getElementById("category-container").classList.add("hidden");
+            document.getElementById("quiz-container").classList.remove("hidden");
+
+            document.body.style.background = currentCategory === "history" ? "beige" : currentCategory === "technology" ? "lightblue" : "lightpink";
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= questions[currentCategory].length) {
+                let highScore = Math.max(score, localStorage.getItem("highscore") || 0);
+                localStorage.setItem("highscore", highScore);
+                alert(`Quiz Over! Score: ${score} | High Score: ${highScore}`);
+                location.reload();
+                return;
+            }
+
+            let qData = questions[currentCategory][currentQuestionIndex];
+            document.getElementById("question").innerText = qData.q;
+            document.getElementById("options").innerHTML = qData.options.map(option => `<button onclick="checkAnswer('${option}')">${option}</button>`).join(" ");
+            startTimer();
+        }
+
+        function startTimer() {
+            let time = 10;
+            document.getElementById("timer").innerText = `Time: ${time}`;
+            clearInterval(timer);
+            timer = setInterval(() => {
+                time--;
+                document.getElementById("timer").innerText = `Time: ${time}`;
+                if (time === 0) {
+                    clearInterval(timer);
+                    alert("Time's up!");
+                    nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function checkAnswer(answer) {
+            clearInterval(timer);
+            let correct = questions[currentCategory][currentQuestionIndex].answer;
+            alert(answer === correct ? "Correct!" : "Wrong!");
+            if (answer === correct) score++;
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function useHint() {
+            if (hintUsed) return alert("Hint already used!");
+            alert("Hint: " + questions[currentCategory][currentQuestionIndex].hint);
+            hintUsed = true;
+        }
+    </script>
+</body>
+</html>
+
